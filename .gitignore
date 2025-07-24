@@ -1,0 +1,9 @@
+# Flask backend
+backend/venv/
+backend/__pycache__/
+backend/.env
+
+# OS files
+.DS_Store
+
+.env
