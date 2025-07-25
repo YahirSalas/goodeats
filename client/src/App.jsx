@@ -5,6 +5,8 @@ import Home from './pages/home'
 import Login from './pages/Login'
 import Navbar from './components/NavBar'
 import SubmitDeal from './pages/SubmitDeal'
+import MapCompnent from './components/MapComponent'
+import Map from './pages/Map'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -29,6 +31,7 @@ function App() {
       <Routes>
         <Route path="/" element={session ? <Home /> : <Login />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/map" element={<Map />} />
         <Route path="*" element={<p>404 Not Found</p>} />
         <Route path="/submit" element={session ? <SubmitDeal /> : <Login />} />
       </Routes>

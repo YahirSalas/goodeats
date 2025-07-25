@@ -7,6 +7,9 @@ import os
 # Load environment variables
 load_dotenv()
 
+print("SUPABASE_URL:", os.getenv("SUPABASE_URL"))
+print("SUPABASE_SERVICE_ROLE_KEY:", os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
+
 # Initialize Flask
 app = Flask(__name__)
 CORS(app)
