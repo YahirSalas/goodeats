@@ -2,7 +2,6 @@ annotated-types==0.7.0
 anyio==4.9.0
 blinker==1.9.0
 certifi==2025.7.14
-click==8.2.1
 deprecation==2.1.0
 Flask==3.1.1
 flask-cors==6.0.1
