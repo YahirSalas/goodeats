@@ -1,13 +1,35 @@
 import React from 'react'
 import {APIProvider, Map, AdvancedMarker, Pin} from '@vis.gl/react-google-maps';
-import { supabase } from '../helper/supabaseClient';
+import { supabase } from '../supabaseClient';
+import { useState, useEffect } from 'react';
 
 
 function MapComponent() {
-  
-  const [lat, lng] = [40.717623812588265, -73.99448636081593]
 
-  const PoiMarkers = (props ) => {
+  const [pois, setPois] = useState([]); 
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    const { data, error } = await supabase.from('restaurants').select();
+    if (error) {
+      console.error('Error fetching data:', error.message);
+      setError(error.message);
+    } else {
+      const transformedData = data.map((item) => ({
+        key: item.name, 
+        location: item.coordinates, 
+      }));
+      setPois(transformedData); 
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const [lat, lng] = [39.564700334562666, -99.74791291424387]
+
+  const PoiMarkers = (props) => {
     return (
       <>
         {props.pois.map( (poi) => (
@@ -22,20 +44,19 @@ function MapComponent() {
   };
 
   const locations = [
-    { key: 'Wah Fun No1', location: { lat: 40.717623812588265, lng: -73.99448636081593 } },
   ];
 
   return (
     <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
       <Map
         defaultZoom={13}
-        defaultCenter={ { lat: lat, lng: lng } }
+        defaultCenter={ { lat, lng } }
         mapId="98088ef21ac2107fb7724af0"
         onCameraChanged={(ev) =>
           console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
         }
         style={{ height: '100vh', width: '100%' }} >
-        <PoiMarkers pois={locations} />
+        <PoiMarkers pois={pois} />
       </Map>
     </APIProvider>
   )
