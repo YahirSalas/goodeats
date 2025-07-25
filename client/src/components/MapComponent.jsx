@@ -49,7 +49,7 @@ function MapComponent() {
   return (
     <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
       <Map
-        defaultZoom={13}
+        defaultZoom={5}
         defaultCenter={ { lat, lng } }
         mapId="98088ef21ac2107fb7724af0"
         onCameraChanged={(ev) =>
