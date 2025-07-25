@@ -30,5 +30,17 @@ Finding affordable, local food deals can be frustrating — especially when smal
 - **Frontend**: React, Tailwind CSS  
 - **Backend**: Flask (Python)  
 - **Database**: Supabase  
-- **APIs**: Google Maps API, Google Places API  
+- **APIs**: Google Maps API, Google Places API
+
+---
+
+### 👥 Contributors
+
+Thanks to everyone who helped build GoodEats!
+
+| [![Marco](https://github.com/MarcoGuzBal.png?size=100)](https://github.com/MarcoGuzBal) | [![Yahir](https://github.com/YahirSalas.png?size=20)](https://github.com/YahirSalas) | [![Nathan](https://github.com/Code-Tomato.png?size=100)](https://github.com/Code-Tomato) |
+|:--:|:--:|:--:|
+| [@MarcoGuzBal](https://github.com/MarcoGuzBal) | [@YahirSalas](https://github.com/YahirSalas) | [@Code-Tomato](https://github.com/Code-Tomato) |
+
+
 
