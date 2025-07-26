@@ -42,9 +42,10 @@ def check_restaurant():
     if not place_id:
         return jsonify({"error": "place_id required"}), 400
 
-    result = supabase.table("restaurants").select("*").eq("place_id", place_id).single().execute()
-    if result.data:
-        return jsonify({ "exists": True, "restaurant": result.data })
+    result = supabase.table("restaurants").select("*").eq("place_id", place_id).execute()
+
+    if result.data and len(result.data) > 0:
+        return jsonify({ "exists": True, "restaurant": result.data[0] })
     else:
         return jsonify({ "exists": False })
 
