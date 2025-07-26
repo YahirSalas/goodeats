@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { Link } from 'react-router-dom';
 
 export default function Home() {
   const [deals, setDeals] = useState([]);
@@ -39,36 +40,38 @@ export default function Home() {
       ) : (
         <div className="space-y-4">
           {deals.map((deal, i) => (
-            <div key={i} className="border rounded p-4 bg-white shadow-sm">
-              <h2 className="text-xl font-semibold">{deal.title}</h2>
-              <p className="text-gray-700 mb-2">{deal.description}</p>
+            <Link to={`/restaurant/${deal.restaurant_id}`} key={i}>
+              <div className="border rounded p-4 bg-white shadow-sm hover:bg-gray-50 transition">
+                <h2 className="text-xl font-semibold">{deal.title}</h2>
+                <p className="text-gray-700 mb-2">{deal.description}</p>
 
-              <div className="text-sm text-gray-600 mb-2">
-                <strong>Restaurant:</strong> {deal.restaurants?.name || "Unknown"}
-                <br />
-                <strong>Address:</strong> {deal.restaurants?.address || "—"}
-              </div>
+                <div className="text-sm text-gray-600 mb-2">
+                  <strong>Restaurant:</strong> {deal.restaurants?.name || "Unknown"}
+                  <br />
+                  <strong>Address:</strong> {deal.restaurants?.address || "—"}
+                </div>
 
-              <div className="text-sm">
-                {deal.discount && <span className="font-medium text-green-700">Discount: {deal.discount}%</span>}
-                {deal.price && <span className="font-medium text-green-700">Price: ${deal.price}</span>}
-              </div>
+                <div className="text-sm">
+                  {deal.discount && <span className="font-medium text-green-700">Discount: {deal.discount}%</span>}
+                  {deal.price && <span className="font-medium text-green-700">Price: ${deal.price}</span>}
+                </div>
 
-              <div className="text-sm mt-1">
-                <strong>Food Type:</strong> {deal.food_types || '—'}
-              </div>
+                <div className="text-sm mt-1">
+                  <strong>Food Type:</strong> {deal.food_types || '—'}
+                </div>
 
-              <div className="text-sm mt-1">
-                <strong>Availability:</strong>{' '}
-                {deal.availability?.type === 'recurring'
-                  ? `Every ${deal.availability.days?.map(d => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', ')}`
-                  : `${deal.availability.startDate} → ${deal.availability.endDate}`}
-                {' '}
-                {!deal.availability?.isAllDay &&
-                  deal.availability?.startTime &&
-                  `(${deal.availability.startTime} – ${deal.availability.endTime})`}
+                <div className="text-sm mt-1">
+                  <strong>Availability:</strong>{' '}
+                  {deal.availability?.type === 'recurring'
+                    ? `Every ${deal.availability.days?.map(d => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', ')}`
+                    : `${deal.availability.startDate} → ${deal.availability.endDate}`}
+                  {' '}
+                  {!deal.availability?.isAllDay &&
+                    deal.availability?.startTime &&
+                    `(${deal.availability.startTime} – ${deal.availability.endTime})`}
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
