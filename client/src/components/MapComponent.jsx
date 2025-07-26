@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 function MapComponent() {
 
   const [pois, setPois] = useState([]); 
-  const [error, setError] = useState(null);
+  const [setError] = useState(null);
 
   const fetchData = async () => {
     const { data, error } = await supabase.from('restaurants').select();
@@ -43,8 +43,7 @@ function MapComponent() {
     );
   };
 
-  const locations = [
-  ];
+
 
   return (
     <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>

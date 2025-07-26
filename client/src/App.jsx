@@ -7,6 +7,7 @@ import Navbar from './components/NavBar'
 import SubmitDeal from './pages/SubmitDeal'
 import MapCompnent from './components/MapComponent'
 import Map from './pages/Map'
+import RestaurantDetail from './pages/RestaurantDetail';
 
 function App() {
   const [session, setSession] = useState(null)
@@ -34,6 +35,7 @@ function App() {
         <Route path="/map" element={<Map />} />
         <Route path="*" element={<p>404 Not Found</p>} />
         <Route path="/submit" element={session ? <SubmitDeal /> : <Login />} />
+        <Route path="/restaurant/:id" element={<RestaurantDetail />} />
       </Routes>
     </BrowserRouter>
   )

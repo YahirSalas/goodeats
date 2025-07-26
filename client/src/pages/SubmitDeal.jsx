@@ -27,33 +27,58 @@ export default function SubmitDeal() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const payload = {
-      place_id: storeData.place_id,
-      restaurant: storeData.name,
-      address: storeData.formatted_address,
-      coordinates: {
-        lat: storeData.geometry.location.lat(),
-        lng: storeData.geometry.location.lng()
-      },
-      title,
-      description,
-      price: !isPercent ? amount : null,
-      discount: isPercent ? amount : null,
-      foodTypes: foodType,
-      availability,
-      user_id: "demo-user" // Optional: replace with real user ID
-    };
-
     try {
-      const res = await fetch("http://localhost:5000/api/deals", {
+      // Step 1: Check if restaurant exists
+      const restaurantRes = await fetch("http://localhost:5000/api/restaurants/check", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ place_id: storeData.place_id })
+      });
+
+      const restaurantData = await restaurantRes.json();
+      let restaurant_id;
+
+      if (restaurantData.exists) {
+        restaurant_id = restaurantData.restaurant.id;
+      } else {
+        // Step 2: Create new restaurant
+        const newRes = await fetch("http://localhost:5000/api/restaurants/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: storeData.name,
+            address: storeData.formatted_address,
+            place_id: storeData.place_id,
+            coordinates: {
+              lat: storeData.geometry.location.lat(),
+              lng: storeData.geometry.location.lng()
+            }
+          })
+        });
+
+        const newRestaurant = await newRes.json();
+        restaurant_id = newRestaurant.id;
+      }
+
+      // Step 3: Submit deal
+      const payload = {
+        restaurant_id,
+        title,
+        description,
+        price: !isPercent ? amount : null,
+        discount: isPercent ? amount : null,
+        food_types: foodType,
+        availability,
+        created_by: "demo-user"
+      };
+
+      const dealRes = await fetch("http://localhost:5000/api/deals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
-      const result = await res.json();
+      const result = await dealRes.json();
       console.log("Deal submitted:", result);
       alert("Deal submitted successfully!");
 
