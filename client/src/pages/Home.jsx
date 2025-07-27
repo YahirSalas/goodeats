@@ -7,7 +7,7 @@ export default function Home() {
   const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { user, load } = useAuth()
+  const { user, load } = useAuth();
 
   useEffect(() => {
     async function fetchDeals() {
@@ -25,14 +25,26 @@ export default function Home() {
     fetchDeals();
   }, []);
 
+  const handleSubmitClick = () => {
+    if (user) {
+      navigate('/submit');
+    } else {
+      alert("Please log in to submit a deal.");
+      navigate('/login');
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">🍽️ GoodEats - Nearby Food Deals</h1>
-      {user && (
-        <button className="m-auto bg-blue-500 text-white px-4 py-2 rounded" onClick={() => navigate('/submit')}>
-          Submit Deal
-        </button>
-      )} 
+
+      <button
+        className="m-auto bg-blue-500 text-white px-4 py-2 rounded mb-4"
+        onClick={handleSubmitClick}
+      >
+        Submit Deal
+      </button>
+
       {loading ? (
         <p>Loading deals...</p>
       ) : deals.length === 0 ? (
