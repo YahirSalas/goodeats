@@ -30,7 +30,7 @@ function App() {
     <BrowserRouter>
       <Navbar />
       <Routes>
-        <Route path="/" element={session ? <Home /> : <Login />} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/map" element={<Map />} />
         <Route path="*" element={<p>404 Not Found</p>} />
