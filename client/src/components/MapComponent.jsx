@@ -54,14 +54,22 @@ function MapComponent() {
     }
   };
 
-  const PoiMarkers = (props) => {
+  const handleMarkerClick = (poi) => {
+    console.log('Marker clicked', poi)
+    setIsProgrammaticUpdate(true);
+    setMapCenter(poi.location)
+    setZoom(15);
+  }
+
+  const PoiMarkers = ({ pois, onMarkerClick }) => {
     return (
       <>
-        {props.pois.map( (poi) => (
+        {pois.map((poi) => (
           <AdvancedMarker
             key={poi.key}
-            position={poi.location}>
-          <Pin background={'#FF0000'} glyphColor={'#000'} borderColor={'#000'} />
+            position={poi.location}
+            onClick={() => onMarkerClick(poi)}>
+            <Pin background={'#FF0000'} glyphColor={'#000'} borderColor={'#000'} />
           </AdvancedMarker>
         ))}
       </>
@@ -92,9 +100,10 @@ function MapComponent() {
             console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
           }}
           style={{ height: '100vh', width: '100%' }} >
-          <PoiMarkers pois={pois} />
+          <PoiMarkers pois={pois} onMarkerClick={handleMarkerClick} />
         </Map>
       </APIProvider>
+
       {/* Me Button */}
       <button
       onClick={fetchUserLocation}
