@@ -2,14 +2,17 @@ import React from 'react'
 import {APIProvider, Map, AdvancedMarker, Pin} from '@vis.gl/react-google-maps';
 import { supabase } from '../supabaseClient';
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 
 function MapComponent() {
-
   const [pois, setPois] = useState([]); 
   const [error, setError] = useState(null);
   const [mapCenter, setMapCenter] = useState({ lat: 39.5647, lng: -99.7479 })
-  const [city, setCity] = useState("")
+  const location = useLocation();
+  const dealLocation = location.state?.dealLocation; 
+
+  console.log('Deal Location:', dealLocation);
 
   // Fetches Data from Supabase
   const fetchData = async () => {
@@ -60,15 +63,18 @@ function MapComponent() {
   };
 
   useEffect(() => {
+    if (dealLocation) {
+      console.log('Updating map center to deal location:', dealLocation); // Debugging
+      setMapCenter(dealLocation); // Update the map center to the deal's location
+    }
     fetchData();
-    fetchUserLocation();
-  }, []);
+  }, [dealLocation]);
 
   return (
     <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
       <Map
-        defaultZoom={12}
-        center={ mapCenter }
+        defaultZoom={20}
+        center={mapCenter}
         mapId="98088ef21ac2107fb7724af0"
         onCameraChanged={(ev) =>
           console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
