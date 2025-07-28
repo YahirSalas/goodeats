@@ -1,10 +1,18 @@
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useLocation } from '../LocationContext';
 
 export default function Navbar() {
   const { user, loading } = useAuth();
+  const { location, fetchUserLocation, error } = useLocation();
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchUserLocation(); // Fetch the user's location when the Navbar mounts
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -17,6 +25,17 @@ export default function Navbar() {
       <div className="space-x-4 text-blue-600 font-medium">
         <Link to="/">Home</Link>
         <Link to="/map">Map</Link>
+      </div>
+
+      {/* Display the user's city */}
+      <div className="text-gray-600 font-medium">
+        {error ? (
+          <p className="text-red-500">Error: {error}</p>
+        ) : location.city ? (
+          <p>City: {location.city}</p>
+        ) : (
+          <p>Fetching city...</p>
+        )}
       </div>
 
       <div>

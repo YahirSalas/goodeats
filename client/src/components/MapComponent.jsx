@@ -2,7 +2,8 @@ import React from 'react'
 import {APIProvider, Map, AdvancedMarker, Pin} from '@vis.gl/react-google-maps';
 import { supabase } from '../supabaseClient';
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation  as useReactRouterLocation} from 'react-router-dom';
+import { useLocation as useUserLocation } from '../LocationContext';
 
 
 function MapComponent() {
@@ -12,8 +13,10 @@ function MapComponent() {
   const [zoom, setZoom] = useState(5)
   const [isProgrammaticUpdate, setIsProgrammaticUpdate] = useState(false); 
   const [selectedDeal, setSelectedDeal] = useState(null);
-  const location = useLocation();
+  const location = useReactRouterLocation();
   const dealLocation = location.state?.dealLocation; 
+
+  const { location: userLocation, fetchUserLocation, error: locationError } = useUserLocation();
 
   // Fetches Data from Supabase
   const fetchData = async () => {
@@ -34,25 +37,6 @@ function MapComponent() {
     setIsProgrammaticUpdate(true);
     setMapCenter(center);
     setZoom(zoom);
-  };
-
-  // Fetches the Users Lat and Lng using geolocation API
-  const fetchUserLocation = async () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setMapView({ lat: latitude, lng: longitude }, 12); // Update the map center to the User's Location
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          setError(error.message);
-        }
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
-      setError('Geolocation is not supported by this browser.');
-    }
   };
 
   const handleMarkerClick = (poi) => {
@@ -82,12 +66,13 @@ function MapComponent() {
       setIsProgrammaticUpdate(true);
       setMapView(dealLocation, 15); // Update the map center to the deal's location
     }
+    fetchUserLocation();
     fetchData();
   }, [dealLocation]);
 
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
-      <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
+      <APIProvider apiKey={import.meta.env.VITE_GOOGLE_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
         <Map
           zoom={zoom}
           center={mapCenter}
@@ -107,7 +92,14 @@ function MapComponent() {
 
       {/* Me Button */}
       <button
-      onClick={fetchUserLocation}
+      onClick={() => {
+        if (userLocation?.lat && userLocation?.lng) {
+          setMapCenter({ lat: userLocation.lat, lng: userLocation.lng }); 
+          setZoom(12); 
+        } else {
+          alert('User location is not available. Please allow location access.');
+        }
+      }}
       style={{
         position: 'absolute',
         top: '10px',
