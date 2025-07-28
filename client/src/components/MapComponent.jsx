@@ -11,6 +11,7 @@ function MapComponent() {
   const [mapCenter, setMapCenter] = useState({ lat: 39.5647, lng: -99.7479 })
   const [zoom, setZoom] = useState(5)
   const [isProgrammaticUpdate, setIsProgrammaticUpdate] = useState(false); 
+  const [selectedDeal, setSelectedDeal] = useState(null);
   const location = useLocation();
   const dealLocation = location.state?.dealLocation; 
 
@@ -55,10 +56,10 @@ function MapComponent() {
   };
 
   const handleMarkerClick = (poi) => {
-    console.log('Marker clicked', poi)
     setIsProgrammaticUpdate(true);
     setMapCenter(poi.location)
     setZoom(15);
+    setSelectedDeal(poi);
   }
 
   const PoiMarkers = ({ pois, onMarkerClick }) => {
@@ -141,6 +142,39 @@ function MapComponent() {
       >
         Center
       </button>
+      {/* Popup for Selected Deal */}
+      {selectedDeal && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '50px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+            zIndex: 1000,
+          }}
+        >
+          <h3>{selectedDeal.key}</h3>
+          <p>{selectedDeal.description}</p>
+          <button
+            onClick={() => setSelectedDeal(null)} // Close the popup
+            style={{
+              marginTop: '10px',
+              padding: '5px 10px',
+              backgroundColor: '#007BFF',
+              color: 'white',
+              border: 'none',
+              borderRadius: '3px',
+              cursor: 'pointer',
+            }}
+          >
+            Close
+          </button>
+        </div>
+      )}
     </div>
   )
 }
