@@ -2,13 +2,19 @@ import React from 'react'
 import {APIProvider, Map, AdvancedMarker, Pin} from '@vis.gl/react-google-maps';
 import { supabase } from '../supabaseClient';
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 
 function MapComponent() {
-
   const [pois, setPois] = useState([]); 
-  const [setError] = useState(null);
+  const [error, setError] = useState(null);
+  const [mapCenter, setMapCenter] = useState({ lat: 39.5647, lng: -99.7479 })
+  const location = useLocation();
+  const dealLocation = location.state?.dealLocation; 
 
+  console.log('Deal Location:', dealLocation);
+
+  // Fetches Data from Supabase
   const fetchData = async () => {
     const { data, error } = await supabase.from('restaurants').select();
     if (error) {
@@ -23,11 +29,24 @@ function MapComponent() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const [lat, lng] = [39.564700334562666, -99.74791291424387]
+  // Fetches the Users Lat and Lng using geolocation API
+  const fetchUserLocation = async () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setMapCenter({ lat: latitude, lng: longitude }); 
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          setError(error.message);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+      setError('Geolocation is not supported by this browser.');
+    }
+  };
 
   const PoiMarkers = (props) => {
     return (
@@ -43,13 +62,19 @@ function MapComponent() {
     );
   };
 
-
+  useEffect(() => {
+    if (dealLocation) {
+      console.log('Updating map center to deal location:', dealLocation); // Debugging
+      setMapCenter(dealLocation); // Update the map center to the deal's location
+    }
+    fetchData();
+  }, [dealLocation]);
 
   return (
     <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
       <Map
-        defaultZoom={5}
-        defaultCenter={ { lat, lng } }
+        defaultZoom={20}
+        center={mapCenter}
         mapId="98088ef21ac2107fb7724af0"
         onCameraChanged={(ev) =>
           console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)

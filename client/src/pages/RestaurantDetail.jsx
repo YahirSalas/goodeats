@@ -1,5 +1,5 @@
 // src/pages/RestaurantDetail.jsx
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 export default function RestaurantDetail() {
@@ -7,6 +7,16 @@ export default function RestaurantDetail() {
   const [restaurant, setRestaurant] = useState(null);
   const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  const handleViewOnMap = (deal) => {
+    if (restaurant && restaurant.coordinates) {
+      navigate('/map', { state: { dealLocation: restaurant.coordinates } });
+    } else {
+      console.error('Restaurant coordinates are not available.');
+    }
+  };
 
   useEffect(() => {
     async function fetchRestaurant() {
@@ -56,6 +66,13 @@ export default function RestaurantDetail() {
                   deal.availability?.startTime &&
                   `(${deal.availability.startTime} – ${deal.availability.endTime})`}
               </div>
+              {/* Add a button to view the deal on the map */}
+              <button
+                onClick={handleViewOnMap}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                View on Map
+              </button>
             </div>
           ))}
         </div>
