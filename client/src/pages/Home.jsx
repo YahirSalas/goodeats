@@ -2,12 +2,18 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
+import FilterDropdown from '../components/FilterDropdown.jsx';
+import Sidebar from '../components/Sidebar.jsx';
+import DealCard from '../components/DealCard';
 
 export default function Home() {
   const [deals, setDeals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState('featured'); // NEW
+  const [filters, setFilters] = useState(null);
+  const [layout, setLayout] = useState('grid'); // or 'list' or 'compact'
   const navigate = useNavigate();
-  const { user, load } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchDeals() {
@@ -34,59 +40,106 @@ export default function Home() {
     }
   };
 
+  const filteredDeals = deals.filter(deal => {
+  // First, filter by view
+  if (view === 'featured' && !deal.featured) return false;
+  if (view === 'user' && !deal.submittedByUser) return false;
+  if (view === 'latest') {
+    // You could sort later; for now, include all
+  }
+
+  // Then, filter using filters from dropdown (if any)
+  if (filters) {
+    // Price filtering
+    if (
+      filters.price.length > 0 &&
+      !filters.price.some(symbol => {
+        if (symbol === '$') return deal.price <= 10;
+        if (symbol === '$$') return deal.price > 10 && deal.price <= 20;
+        if (symbol === '$$$') return deal.price > 20;
+        return false;
+      })
+    ) return false;
+
+    // Discount
+    if (
+      filters.discount &&
+      Number(deal.discount) < Number(filters.discount)
+    ) return false;
+
+    // Food Type
+    if (
+      filters.foodTypes.length > 0 &&
+      !filters.foodTypes.includes(deal.food_types)
+    ) return false;
+
+    // Availability
+    if (
+      filters.availability &&
+      filters.availability !== deal.availability?.type
+    ) return false;
+
+    // Sort is ignored for now — can apply after filtering
+  }
+
+  return true;
+});
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">🍽️ GoodEats - Nearby Food Deals</h1>
+    <div className="flex w-full">
+      <Sidebar currentView={view} onChangeView={setView} />
+      <div className="flex-1 p-6 max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6">🍽️ GoodEats - {view.charAt(0).toUpperCase() + view.slice(1)} Deals</h1>
 
-      <button
-        className="m-auto bg-blue-500 text-white px-4 py-2 rounded mb-4"
-        onClick={handleSubmitClick}
-      >
-        Submit Deal
-      </button>
-
-      {loading ? (
-        <p>Loading deals...</p>
-      ) : deals.length === 0 ? (
-        <p>No deals yet. Be the first to submit one!</p>
-      ) : (
-        <div className="space-y-4">
-          {deals.map((deal, i) => (
-            <Link to={`/restaurant/${deal.restaurant_id}`} key={i}>
-              <div className="border rounded p-4 bg-white shadow-sm hover:bg-gray-50 transition">
-                <h2 className="text-xl font-semibold">{deal.title}</h2>
-                <p className="text-gray-700 mb-2">{deal.description}</p>
-
-                <div className="text-sm text-gray-600 mb-2">
-                  <strong>Restaurant:</strong> {deal.restaurants?.name || "Unknown"}
-                  <br />
-                  <strong>Address:</strong> {deal.restaurants?.address || "—"}
-                </div>
-
-                <div className="text-sm">
-                  {deal.discount && <span className="font-medium text-green-700">Discount: {deal.discount}%</span>}
-                  {deal.price && <span className="font-medium text-green-700">Price: ${deal.price}</span>}
-                </div>
-
-                <div className="text-sm mt-1">
-                  <strong>Food Type:</strong> {deal.food_types || '—'}
-                </div>
-
-                <div className="text-sm mt-1">
-                  <strong>Availability:</strong>{' '}
-                  {deal.availability?.type === 'recurring'
-                    ? `Every ${deal.availability.days?.map(d => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', ')}`
-                    : `${deal.availability.startDate} → ${deal.availability.endDate}`}
-                  {' '}
-                  {!deal.availability?.isAllDay &&
-                    deal.availability?.startTime &&
-                    `(${deal.availability.startTime} – ${deal.availability.endTime})`}
-                </div>
+        {view === 'featured' || view === 'latest' || view === 'user' ? (
+          <>
+            <FilterDropdown onApply={(filters) => setFilters(filters)} />
+            <button
+              className="m-auto bg-blue-500 text-white px-4 py-2 rounded mb-4"
+              onClick={handleSubmitClick}
+            >
+              Submit Deal
+            </button>
+            <div className="flex justify-end space-x-2 mb-4">
+              <button
+                onClick={() => setLayout('grid')}
+                className={`px-3 py-1 rounded ${layout === 'grid' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+              >
+                Grid
+              </button>
+              <button
+                onClick={() => setLayout('list')}
+                className={`px-3 py-1 rounded ${layout === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+              >
+                List
+              </button>
+            </div>
+            {loading ? (
+              <p>Loading deals...</p>
+            ) : filteredDeals.length === 0 ? (
+              <p>No deals found for this view.</p>
+            ) : (
+              <div className={
+                layout === 'grid'
+                  ? "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                  : "flex flex-col gap-4"
+              }>
+                {filteredDeals.map((deal, i) => (
+                  <DealCard key={i} deal={deal} layout={layout} />
+                ))}
               </div>
-            </Link>
-          ))}
-        </div>
-      )}
+            )}
+          </>
+        ) : view === 'leaderboard' ? (
+          <p>🏆 Leaderboard view coming soon...</p>
+        ) : view === 'saved' ? (
+          <p>📌 Show user's saved deals here...</p>
+        ) : view === 'daily' ? (
+          <p>🌟 Show Deal of the Day here...</p>
+        ) : view === 'alerts' ? (
+          <p>🚨 Show local alerts and closures here...</p>
+        ) : null}
+      </div>
     </div>
   );
 }
