@@ -66,7 +66,12 @@ def create_restaurant():
         "address": address,
         "place_id": place_id,
         "latitude": coordinates["lat"],
-        "longitude": coordinates["lng"]
+        "longitude": coordinates["lng"],
+        "coordinates": {
+            "lat": coordinates["lat"],
+            "lng": coordinates["lng"]
+        },
+        "photo_url": data.get("photo_url")
     }
 
     result = supabase.table("restaurants").insert(new_restaurant).execute()
