@@ -88,14 +88,14 @@ export default function Home() {
   return (
     <div className="flex w-full">
       <Sidebar currentView={view} onChangeView={setView} />
-      <div className="flex-1 p-6 max-w-5xl mx-auto">
+      <div className="flex-1  p-6 max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">🍽️ GoodEats - {view.charAt(0).toUpperCase() + view.slice(1)} Deals</h1>
 
         {view === 'featured' || view === 'latest' || view === 'user' ? (
           <>
             <FilterDropdown onApply={(filters) => setFilters(filters)} />
             <button
-              className="m-auto bg-blue-500 text-white px-4 py-2 rounded mb-4"
+              className="m-auto bg-blue-500 text-white px-4 py-2 rounded mb-6 "
               onClick={handleSubmitClick}
             >
               Submit Deal

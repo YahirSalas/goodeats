@@ -6,7 +6,6 @@ import Logo from '../assets/logo.svg';
 import { FiSearch, FiMapPin } from 'react-icons/fi';
 import { FiUser, FiSettings } from 'react-icons/fi';
 import { MdPerson, MdSettings } from 'react-icons/md';
-import React, { useEffect } from 'react';
 import { useLocation } from '../LocationContext';
 
 export default function Navbar() {
@@ -55,7 +54,7 @@ export default function Navbar() {
             <img
               src={Logo}
               alt="logo"
-              className="h-15 w-auto rotate-90"
+              className="h-15 w-auto rotate-90 m-5px"
             />
           </div>
         </div>
@@ -73,6 +72,7 @@ export default function Navbar() {
       </div>      
 
       <div className="flex items-center space-x-4 text-black">
+        {/* Search Bar */}
         <div className="flex items-center bg-[#D6E7EF] rounded-full px-4 py-1 max-w-md flex-grow h-7.5">
           <FiSearch className="text-gray-500 mr-2" />
           <input
@@ -82,13 +82,18 @@ export default function Navbar() {
           />
         </div>
 
+        {/* Location Display */}
         <div className="flex items-center bg-[#D6E7EF] rounded-full px-3 py-1 text-sm h-7.5">
           <FiMapPin className="mr-1" />
-          123 Main St.
+          {error ? (
+            <p className="text-red-500">Error: {error}</p>
+          ) : location.city ? (
+            <p>{location.city}</p>
+          ) : (
+            <p>Fetching city...</p>
+          )}
         </div>
 
-      <div>
-         main
         {loading ? null : user ? (
           <>
             <div className="relative group">
