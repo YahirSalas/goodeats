@@ -12,6 +12,8 @@ export default function Home() {
   const [view, setView] = useState('featured'); // NEW
   const [filters, setFilters] = useState(null);
   const [layout, setLayout] = useState('grid'); // or 'list' or 'compact'
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -30,6 +32,26 @@ export default function Home() {
 
     fetchDeals();
   }, []);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      if (view === 'leaderboard') {
+        setLoadingLeaderboard(true);
+        try {
+          const response = await fetch('http://localhost:5000/api/leaderboard');
+          const data = await response.json();
+          console.log('Leaderboard Data:', data); 
+          setLeaderboard(data);
+        } catch (error) {
+          console.error('Error fetching leaderboard:', error); 
+        } finally {
+          setLoadingLeaderboard(false);
+        }
+      }
+    };
+  
+    fetchLeaderboard();
+  }, [view]);
 
   const handleSubmitClick = () => {
     if (user) {
@@ -131,11 +153,39 @@ export default function Home() {
             )}
           </>
         ) : view === 'leaderboard' ? (
-          <p>🏆 Leaderboard view coming soon...</p>
+          loading ? (
+            <p>Loading leaderboard...</p>
+          ) : leaderboard.length === 0 ? (
+            <p>No users found on the leaderboard.</p>
+          ) : (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">🏆 Leaderboard</h2>
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 px-4 py-2">Rank</th>
+                    <th className="border border-gray-300 px-4 py-2">Name</th>
+                    <th className="border border-gray-300 px-4 py-2">Email</th>
+                    <th className="border border-gray-300 px-4 py-2">Deals Posted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderboard.map((user, index) => (
+                    <tr key={user.id} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 px-4 py-2 text-center">{index + 1}</td>
+                      <td className="border border-gray-300 px-4 py-2">{user.display_name || 'Anonymous'}</td>
+                      <td className="border border-gray-300 px-4 py-2">{user.email}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">{user.deals_posted_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : view === 'saved' ? (
           <p>📌 Show user's saved deals here...</p>
-        ) : view === 'daily' ? (
-          <p>🌟 Show Deal of the Day here...</p>
+        ) : view === 'mine' ? (
+          <p>🌟 Show My Posted Deals here...</p>
         ) : view === 'alerts' ? (
           <p>🚨 Show local alerts and closures here...</p>
         ) : null}

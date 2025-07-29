@@ -27,6 +27,16 @@ def get_deals():
     response = supabase.table("deals").select("*, restaurants(*)").execute()
     return jsonify(response.data)
 
+@app.route('/api/leaderboard', methods=['GET'])
+def get_leaderboard():
+    response = supabase.table("user_profiles") \
+    .select('id, email, display_name, deals_posted_count') \
+    .order('deals_posted_count', desc=True) \
+    .execute()
+
+    # Return the data if no error
+    return jsonify(response.data), 200
+
 # Submit a new deal
 @app.route('/api/deals', methods=['POST'])
 def add_deal():
@@ -71,7 +81,6 @@ def create_restaurant():
             "lat": coordinates["lat"],
             "lng": coordinates["lng"]
         },
-        "photo_url": data.get("photo_url")
     }
 
     result = supabase.table("restaurants").insert(new_restaurant).execute()

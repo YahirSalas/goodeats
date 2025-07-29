@@ -6,6 +6,11 @@ import DealAvailability from '../components/DealAvailability';
 import PriceInput from '../components/PriceInput';
 import FoodTypeSelect from '../components/FoodTypeSelect';
 
+import { supabase } from '../supabaseClient';
+
+const user = await supabase.auth.getUser();
+const userId = user?.data?.user?.id; 
+
 export default function SubmitDeal() {
   const [storeData, setStoreData] = useState(null);
 
@@ -15,6 +20,7 @@ export default function SubmitDeal() {
   const [amount, setAmount] = useState('');
   const [foodType, setFoodType] = useState('');
   const [availability, setAvailability] = useState(null);
+
 
   const handlePlaceSelect = (place) => {
     if (place && place.place_id) {
@@ -69,7 +75,7 @@ export default function SubmitDeal() {
         discount: isPercent ? amount : null,
         food_types: foodType,
         availability,
-        created_by: "demo-user"
+        created_by: userId
       };
 
       const dealRes = await fetch("http://localhost:5000/api/deals", {
