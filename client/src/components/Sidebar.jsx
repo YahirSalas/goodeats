@@ -7,7 +7,7 @@ const sections = [
   { label: 'User-Submitted', key: 'user' },
   { label: 'Top Contributors', key: 'leaderboard' },
   { label: 'Saved Deals', key: 'saved' },
-  { label: 'My Deals', key: 'mine' },
+  { label: 'My Deals', key: 'my' },
 ];
 
 export default function Sidebar({ currentView, onChangeView }) {

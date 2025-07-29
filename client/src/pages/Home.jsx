@@ -8,7 +8,9 @@ import DealCard from '../components/DealCard';
 
 export default function Home() {
   const [deals, setDeals] = useState([]);
+  const [myDeals, setMyDeals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [view, setView] = useState('featured'); // NEW
   const [filters, setFilters] = useState(null);
   const [layout, setLayout] = useState('grid'); // or 'list' or 'compact'
@@ -16,6 +18,36 @@ export default function Home() {
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  useEffect(() => {
+    const fetchMyDeals = async () => {
+      if (view === 'my' && user) {
+        setLoading(true);
+        try {
+          const response = await fetch('http://localhost:5000/api/my_deals', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_id: user.id }), 
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          setMyDeals(data); // Update the state with the fetched deals
+        } catch (err) {
+          console.error('Error fetching my deals:', err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchMyDeals();
+  }, [view, user]);
 
   useEffect(() => {
     async function fetchDeals() {
@@ -184,8 +216,44 @@ export default function Home() {
           )
         ) : view === 'saved' ? (
           <p>📌 Show user's saved deals here...</p>
-        ) : view === 'mine' ? (
-          <p>🌟 Show My Posted Deals here...</p>
+        ) : view === 'my' ? (
+          loading ? (
+            <p>Loading your deals...</p>
+          ) : error ? (
+            <p className="text-red-500">{error}</p>
+          ) : myDeals.length === 0 ? (
+            <p>You have not posted any deals yet.</p>
+          ) : (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">🌟 My Posted Deals</h2>
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 px-4 py-2">Title</th>
+                    <th className="border border-gray-300 px-4 py-2">Description</th>
+                    <th className="border border-gray-300 px-4 py-2">Price</th>
+                    <th className="border border-gray-300 px-4 py-2">Food Type</th>
+                    <th className="border border-gray-300 px-4 py-2">Availability</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {myDeals.map((deal) => (
+                    <tr key={deal.id} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 px-4 py-2">{deal.title}</td>
+                      <td className="border border-gray-300 px-4 py-2">{deal.description}</td>
+                      <td className="border border-gray-300 px-4 py-2 text-center">${deal.price}</td>
+                      <td className="border border-gray-300 px-4 py-2">{deal.food_types}</td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {deal.availability.isAllDay
+                          ? 'All Day'
+                          : `${deal.availability.startTime} - ${deal.availability.endTime}`}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : view === 'alerts' ? (
           <p>🚨 Show local alerts and closures here...</p>
         ) : null}

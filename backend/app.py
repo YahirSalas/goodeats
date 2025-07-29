@@ -16,11 +16,6 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Test route
-@app.route('/api/hello')
-def hello():
-    return jsonify({"message": "Hello from Flask!"})
-
 # Get all deals with restaurant info
 @app.route('/api/deals', methods=['GET'])
 def get_deals():
@@ -37,6 +32,25 @@ def get_leaderboard():
     # Return the data if no error
     return jsonify(response.data), 200
 
+@app.route('/api/my_deals', methods=['POST'])
+def get_my_deals():
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+
+        if not user_id:
+            return jsonify({"error": "Missing user_id"}), 400
+
+        response = supabase.table("deals").select("*").eq("created_by", user_id).execute()
+
+        return jsonify(response.data), 200
+
+    except Exception as e:
+        print(f"Exception in get_my_deals: {str(e)}")  # Debug log
+        import traceback
+        traceback.print_exc()  # Full stack trace
+        return jsonify({"error": str(e)}), 500
+    
 # Submit a new deal
 @app.route('/api/deals', methods=['POST'])
 def add_deal():
