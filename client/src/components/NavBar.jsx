@@ -6,10 +6,13 @@ import Logo from '../assets/logo.svg';
 import { FiSearch, FiMapPin } from 'react-icons/fi';
 import { FiUser, FiSettings } from 'react-icons/fi';
 import { MdPerson, MdSettings } from 'react-icons/md';
-
+import React, { useEffect } from 'react';
+import { useLocation } from '../LocationContext';
 
 export default function Navbar() {
   const { user, loading } = useAuth();
+  const { location, fetchUserLocation, error } = useLocation();
+
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -31,6 +34,10 @@ export default function Navbar() {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    fetchUserLocation(); // Fetch the user's location when the Navbar mounts
   }, []);
 
   const handleLogout = async () => {
@@ -80,6 +87,8 @@ export default function Navbar() {
           123 Main St.
         </div>
 
+      <div>
+         main
         {loading ? null : user ? (
           <>
             <div className="relative group">

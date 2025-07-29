@@ -2,17 +2,21 @@ import React from 'react'
 import {APIProvider, Map, AdvancedMarker, Pin} from '@vis.gl/react-google-maps';
 import { supabase } from '../supabaseClient';
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation  as useReactRouterLocation} from 'react-router-dom';
+import { useLocation as useUserLocation } from '../LocationContext';
 
 
 function MapComponent() {
   const [pois, setPois] = useState([]); 
   const [error, setError] = useState(null);
   const [mapCenter, setMapCenter] = useState({ lat: 39.5647, lng: -99.7479 })
-  const location = useLocation();
+  const [zoom, setZoom] = useState(5)
+  const [isProgrammaticUpdate, setIsProgrammaticUpdate] = useState(false); 
+  const [selectedDeal, setSelectedDeal] = useState(null);
+  const location = useReactRouterLocation();
   const dealLocation = location.state?.dealLocation; 
 
-  console.log('Deal Location:', dealLocation);
+  const { location: userLocation, fetchUserLocation, error: locationError } = useUserLocation();
 
   // Fetches Data from Supabase
   const fetchData = async () => {
@@ -29,33 +33,28 @@ function MapComponent() {
     }
   };
 
-  // Fetches the Users Lat and Lng using geolocation API
-  const fetchUserLocation = async () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setMapCenter({ lat: latitude, lng: longitude }); 
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          setError(error.message);
-        }
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
-      setError('Geolocation is not supported by this browser.');
-    }
+  const setMapView = (center, zoom) => {
+    setIsProgrammaticUpdate(true);
+    setMapCenter(center);
+    setZoom(zoom);
   };
 
-  const PoiMarkers = (props) => {
+  const handleMarkerClick = (poi) => {
+    setIsProgrammaticUpdate(true);
+    setMapCenter(poi.location)
+    setZoom(15);
+    setSelectedDeal(poi);
+  }
+
+  const PoiMarkers = ({ pois, onMarkerClick }) => {
     return (
       <>
-        {props.pois.map( (poi) => (
+        {pois.map((poi) => (
           <AdvancedMarker
             key={poi.key}
-            position={poi.location}>
-          <Pin background={'#FF0000'} glyphColor={'#000'} borderColor={'#000'} />
+            position={poi.location}
+            onClick={() => onMarkerClick(poi)}>
+            <Pin background={'#FF0000'} glyphColor={'#000'} borderColor={'#000'} />
           </AdvancedMarker>
         ))}
       </>
@@ -64,25 +63,111 @@ function MapComponent() {
 
   useEffect(() => {
     if (dealLocation) {
-      console.log('Updating map center to deal location:', dealLocation); // Debugging
-      setMapCenter(dealLocation); // Update the map center to the deal's location
+      setIsProgrammaticUpdate(true);
+      setMapView(dealLocation, 15); // Update the map center to the deal's location
     }
+    fetchUserLocation();
     fetchData();
   }, [dealLocation]);
 
   return (
-    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
-      <Map
-        defaultZoom={20}
-        center={mapCenter}
-        mapId="98088ef21ac2107fb7724af0"
-        onCameraChanged={(ev) =>
-          console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
+    <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
+      <APIProvider apiKey={import.meta.env.VITE_GOOGLE_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
+        <Map
+          zoom={zoom}
+          center={mapCenter}
+          mapId="98088ef21ac2107fb7724af0"
+          onCameraChanged={(ev) =>{
+            if (!isProgrammaticUpdate) {
+              setMapCenter(ev.detail.center);
+              setZoom(ev.detail.zoom);
+            }
+            setIsProgrammaticUpdate(false);
+            console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
+          }}
+          style={{ height: '100vh', width: '100%' }} >
+          <PoiMarkers pois={pois} onMarkerClick={handleMarkerClick} />
+        </Map>
+      </APIProvider>
+
+      {/* Me Button */}
+      <button
+      onClick={() => {
+        if (userLocation?.lat && userLocation?.lng) {
+          setMapCenter({ lat: userLocation.lat, lng: userLocation.lng }); 
+          setZoom(12); 
+        } else {
+          alert('User location is not available. Please allow location access.');
         }
-        style={{ height: '100vh', width: '100%' }} >
-        <PoiMarkers pois={pois} />
-      </Map>
-    </APIProvider>
+      }}
+      style={{
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: 1000,
+        padding: '10px 15px',
+        backgroundColor: '#007BFF',
+        color: '#FFF',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+      }}
+      >
+        Me
+      </button>
+
+      {/* Default Center Button */}
+      <button
+        onClick={() => setMapView({ lat: 39.5647, lng: -99.7479 }, 4)} 
+        style={{
+          position: 'absolute',
+          top: '50px', // Position below the "Me" button
+          right: '10px',
+          zIndex: 1000,
+          padding: '10px 15px',
+          backgroundColor: '#28A745',
+          color: '#FFF',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+        }}
+      >
+        Center
+      </button>
+      {/* Popup for Selected Deal */}
+      {selectedDeal && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '50px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+            zIndex: 1000,
+          }}
+        >
+          <h3>{selectedDeal.key}</h3>
+          <p>{selectedDeal.description}</p>
+          <button
+            onClick={() => setSelectedDeal(null)} // Close the popup
+            style={{
+              marginTop: '10px',
+              padding: '5px 10px',
+              backgroundColor: '#007BFF',
+              color: 'white',
+              border: 'none',
+              borderRadius: '3px',
+              cursor: 'pointer',
+            }}
+          >
+            Close
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 
