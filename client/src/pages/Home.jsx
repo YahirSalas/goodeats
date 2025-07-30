@@ -24,7 +24,7 @@ export default function Home() {
       if (view === 'my' && user) {
         setLoading(true);
         try {
-          const response = await fetch('http://localhost:5000/api/my_deals', {
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/my_deals`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchDeals() {
       try {
-        const res = await fetch('http://localhost:5000/api/deals');
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/deals`);
         const data = await res.json();
         setDeals(data);
       } catch (err) {
@@ -70,7 +70,7 @@ export default function Home() {
       if (view === 'leaderboard') {
         setLoadingLeaderboard(true);
         try {
-          const response = await fetch('http://localhost:5000/api/leaderboard');
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/leaderboard`);
           const data = await response.json();
           console.log('Leaderboard Data:', data); 
           setLeaderboard(data);

@@ -35,7 +35,7 @@ export default function SubmitDeal() {
 
     try {
       // Step 1: Check if restaurant exists
-      const restaurantRes = await fetch("http://localhost:5000/api/restaurants/check", {
+      const restaurantRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/restaurants/check`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ place_id: storeData.place_id })
@@ -48,7 +48,7 @@ export default function SubmitDeal() {
         restaurant_id = restaurantData.restaurant.id;
       } else {
         // Step 2: Create new restaurant
-        const newRes = await fetch("http://localhost:5000/api/restaurants/create", {
+        const newRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/restaurants/create`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -78,7 +78,7 @@ export default function SubmitDeal() {
         created_by: userId
       };
 
-      const dealRes = await fetch("http://localhost:5000/api/deals", {
+      const dealRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/deals`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
