@@ -117,14 +117,7 @@ def get_restaurant_details(restaurant_id):
         "deals": deals_res.data
     })
 
-# Serve frontend static files
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-def serve(path):
-    if path != "" and os.path.exists(os.path.join("../client/dist", path)):
-        return send_from_directory("../client/dist", path)
-    else:
-        return send_from_directory("../client/dist", "index.html")
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
