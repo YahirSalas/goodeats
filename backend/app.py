@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -117,9 +117,14 @@ def get_restaurant_details(restaurant_id):
         "deals": deals_res.data
     })
 
-@app.route('/')
-def index():
-    return 'Flask is running!'
+# Serve frontend static files
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve(path):
+    if path != "" and os.path.exists(os.path.join("../client/dist", path)):
+        return send_from_directory("../client/dist", path)
+    else:
+        return send_from_directory("../client/dist", "index.html")
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
