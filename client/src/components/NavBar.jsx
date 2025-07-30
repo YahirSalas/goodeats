@@ -54,7 +54,7 @@ export default function Navbar() {
             <img
               src={Logo}
               alt="logo"
-              className="h-15 w-auto rotate-90 m-5px"
+              className="h-15 w-auto rotate-90 "
             />
           </div>
         </div>
