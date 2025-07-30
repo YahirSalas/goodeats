@@ -20,7 +20,7 @@ export default function RestaurantDetail() {
 
   useEffect(() => {
     async function fetchRestaurant() {
-      const res = await fetch(`http://localhost:5000/api/restaurants/${id}`);
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/restaurants/${id}`);
       const data = await res.json();
       setRestaurant(data.restaurant);
       setDeals(data.deals);
